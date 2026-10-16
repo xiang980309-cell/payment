@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudStock · 快速付款</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c10;--s1:#11141a;--s2:#161b22;--s3:#1c2330;
+  --bd:rgba(255,255,255,.07);--bl:rgba(255,255,255,.14);
+  --ac:#7c8cff;--ag:rgba(124,140,255,.16);
+  --sf:#3dd68c;--sfg:rgba(61,214,140,.12);
+  --wa:#e8b86d;--dg:#f07178;
+  --t1:#eef1f6;--t2:#9aa4b2;--t3:#6b7585;
+  --r:10px;--rl:14px;
+  --tr:.2s cubic-bezier(.22,1,.36,1);
+}
+html{font-size:15px}
+body{font-family:'Inter','Noto Sans SC',system-ui,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased}
+::selection{background:var(--ac);color:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;padding:1.25rem 1rem 2.5rem}
+.top{display:flex;align-items:center;gap:.65rem;margin-bottom:1.25rem}
+.logo{width:40px;height:40px;border-radius:10px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--bg);flex-shrink:0}
+.top h1{font-size:1.15rem;font-weight:700;flex:1}
+.top h1 span{color:var(--ac)}
+.lang{background:var(--s2);border:1px solid var(--bd);color:var(--t2);padding:.45rem .75rem;border-radius:var(--r);cursor:pointer;font-size:.78rem;font-weight:600}
+.lang:hover{border-color:var(--bl);color:var(--t1)}
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--rl);padding:1.15rem 1.15rem;margin-bottom:.85rem}
+.card.pay{background:linear-gradient(135deg,#3dd68c12,transparent 55%),var(--s1);border-color:#3dd68c30}
+.card h2{font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:.45rem;margin-bottom:.9rem}
+.badge{margin-left:auto;font-family:'DM Mono',monospace;font-size:.62rem;padding:.15rem .45rem;border-radius:4px;background:var(--sfg);color:var(--sf);font-weight:500}
+.row{display:flex;align-items:flex-start;gap:.55rem;padding:.55rem 0;border-bottom:1px solid var(--bd)}
+.row:last-of-type{border-bottom:none}
+.row .ic{font-size:.95rem;width:1.25rem;text-align:center;flex-shrink:0;line-height:1.4}
+.row .lb{font-size:.72rem;color:var(--t3);min-width:4.5rem;flex-shrink:0;line-height:1.4;padding-top:.1rem}
+.row .vl{flex:1;font-size:.86rem;font-weight:500;word-break:break-all;user-select:all;line-height:1.45;font-family:'DM Mono',monospace}
+.copy{flex-shrink:0;background:var(--ag);color:var(--ac);border:none;border-radius:6px;padding:.22rem .55rem;font-size:.68rem;font-weight:600;cursor:pointer;transition:all var(--tr)}
+.copy:hover{filter:brightness(1.15)}
+.copy.done{background:var(--sfg);color:var(--sf)}
+.note{margin-top:.85rem;padding:.7rem .85rem;background:var(--s2);border-radius:var(--r);font-size:.78rem;color:var(--t2);line-height:1.55}
+.note b{color:var(--wa);font-weight:600}
+.amt-box{margin-bottom:.85rem}
+.amt-box label{display:block;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:.4rem}
+.amt-box .fi{display:flex;gap:.5rem}
+.amt-box input{flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:.7rem .85rem;color:var(--t1);font-size:1rem;font-family:'DM Mono',monospace;outline:none}
+.amt-box input:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ag)}
+.btn{background:var(--ac);color:var(--bg);border:none;border-radius:var(--r);padding:.7rem 1.15rem;font-weight:700;font-size:.85rem;cursor:pointer;transition:all var(--tr)}
+.btn:hover{filter:brightness(1.08)}
+.tier{padding:.75rem .85rem;border-radius:var(--r);border:1px solid var(--bd);background:var(--s2);margin-bottom:.55rem;transition:all var(--tr)}
+.tier.on{border-color:var(--sf);background:var(--sfg)}
+.tier .hd{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem}
+.tier .rg{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--t2);font-weight:500}
+.tier.on .rg{color:var(--sf)}
+.tier .mk{margin-left:auto;font-size:.62rem;font-weight:700;color:var(--sf);opacity:0}
+.tier.on .mk{opacity:1}
+.tier .dt{font-size:.74rem;color:var(--t3);line-height:1.5;font-family:'DM Mono',monospace;word-break:break-all}
+.empty{padding:1.5rem 1rem;text-align:center;color:var(--t3);font-size:.85rem;line-height:1.6}
+.spin{width:28px;height:28px;border:2.5px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite;margin:2.5rem auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+#toast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);background:var(--s3);border:1px solid var(--bl);color:var(--t1);padding:.55rem 1rem;border-radius:var(--r);font-size:.8rem;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
+#toast.show{opacity:1}
+.footer{text-align:center;margin-top:1.25rem;font-size:.68rem;color:var(--t3);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">¥</div>
+    <h1 id="ttl"><span>CloudStock</span> · <b data-t="title">快速付款</b></h1>
+    <button class="lang" id="langBtn" onclick="toggleLang()">PT/BR</button>
+  </div>
+
+  <div class="card amt-box" style="padding:1rem 1.15rem">
+    <label data-t="amountLabel">订单金额（可选，用于匹配账户）</label>
+    <div class="fi">
+      <input type="number" id="amt" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-t-ph="amountPh" oninput="onAmt()">
+      <button class="btn" onclick="onAmt()" data-t="match">匹配</button>
+    </div>
+  </div>
+
+  <div id="main"><div class="spin"></div></div>
+
+  <div class="footer" data-t="footer">收款信息由管理员维护 · 只读展示</div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ═══ CONFIG ═══
+const SB_URL = 'https://qpynlblzpmkoovyaxygn.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFweW5sYmx6cG1rb292eWF4eWduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzMzE4MzIsImV4cCI6MjEwNDkwNzgzMn0.kXn9UjxNYTVZ85kFEdlxIgH5Mw7nESUI9uz37nDrvJ8';
+let sb = null;
+try { sb = supabase.createClient(SB_URL, SB_KEY); } catch (e) { console.error('SB init failed', e); }
+
+// ═══ i18n ═══
+let lang = localStorage.getItem('cs-lang') || 'zh';
+const T = {
+  zh: {
+    title: '快速付款', amountLabel: '订单金额（可选，用于匹配账户）', amountPh: '输入金额…', match: '匹配',
+    payAccount: '收款账号', pix: 'PIX', bankName: '银行名称', bankAccount: '银行账号', bankHolder: '户名',
+    copy: '复制', copied: '已复制', note: '付款说明', tiers: '额度账户档',
+    hit: '当前使用', range: '额度范围', unlimited: '不限', to: '至',
+    empty: '暂未配置收款账号', loadFail: '配置加载失败', noTier: '无匹配档位，使用默认账户',
+    footer: '收款信息由管理员维护 · 只读展示'
+  },
+  pt: {
+    title: 'Pagamento Rápido', amountLabel: 'Valor do pedido (opcional)', amountPh: 'Digite o valor…', match: 'Buscar',
+    payAccount: 'Conta de Recebimento', pix: 'PIX', bankName: 'Banco', bankAccount: 'Conta', bankHolder: 'Titular',
+    copy: 'Copiar', copied: 'Copiado', note: 'Instruções', tiers: 'Faixas de valor',
+    hit: 'Em uso', range: 'Faixa', unlimited: 'Sem limite', to: 'a',
+    empty: 'Conta não configurada', loadFail: 'Falha ao carregar', noTier: 'Sem faixa, usando conta padrão',
+    footer: 'Informações mantidas pela administração · somente leitura'
+  }
+};
+function t(k){ return (T[lang] && T[lang][k]) || (T.zh[k] || k); }
+function applyLang(){
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'pt-BR';
+  document.getElementById('langBtn').textContent = lang === 'zh' ? 'PT/BR' : '中/文';
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  document.querySelectorAll('[data-t-ph]').forEach(el => { el.placeholder = t(el.dataset.tPh); });
+  render();
+}
+function toggleLang(){
+  lang = lang === 'zh' ? 'pt' : 'zh';
+  localStorage.setItem('cs-lang', lang);
+  applyLang();
+}
+
+// ═══ DATA ═══
+let paymentAccounts = {};
+let tiers = [];
+
+function esc(s){
+  if (s == null) return '';
+  const d = document.createElement('div');
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+
+async function loadPaymentAccounts(){
+  if (!sb) throw new Error('no_sb');
+  const { data, error } = await sb.from('site_settings').select('key,value,label');
+  if (error) throw error;
+  paymentAccounts = {};
+  (data || []).forEach(r => { paymentAccounts[r.key] = { value: r.value, label: r.label }; });
+  tiers = [];
+  try {
+    const raw = paymentAccounts.pay_tiers ? paymentAccounts.pay_tiers.value : '';
+    tiers = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(tiers)) tiers = [];
+  } catch (_) { tiers = []; }
+}
+
+function defaultAccount(){
+  return {
+    pix: (paymentAccounts.pay_pix && paymentAccounts.pay_pix.value) || '',
+    bank_name: (paymentAccounts.pay_bank_name && paymentAccounts.pay_bank_name.value) || '',
+    bank_account: (paymentAccounts.pay_bank_account && paymentAccounts.pay_bank_account.value) || '',
+    bank_holder: (paymentAccounts.pay_bank_holder && paymentAccounts.pay_bank_holder.value) || ''
+  };
+}
+
+function matchTier(total){
+  if (total == null || total === '' || isNaN(Number(total))) return null;
+  const n = Number(total);
+  return tiers.filter(tr => {
+    const minOk = tr.min == null || tr.min === '' || n >= Number(tr.min);
+    const maxOk = tr.max == null || tr.max === '' || n <= Number(tr.max);
+    return minOk && maxOk;
+  }).sort((a, b) => Number(b.min || 0) - Number(a.min || 0))[0] || null;
+}
+
+function activeAccount(){
+  const hit = matchTier(document.getElementById('amt').value);
+  if (hit) {
+    return {
+      pix: hit.pix || '',
+      bank_name: hit.bank_name || '',
+      bank_account: hit.bank_account || '',
+      bank_holder: hit.bank_holder || ''
+    };
+  }
+  return defaultAccount();
+}
+
+function rangeLabel(tr){
+  const mn = tr.min == null || tr.min === '' ? null : Number(tr.min);
+  const mx = tr.max == null || tr.max === '' ? null : Number(tr.max);
+  if (mn == null && mx == null) return t('unlimited');
+  if (mx == null) return '≥ ' + mn;
+  if (mn == null) return '≤ ' + mx;
+  return mn + ' ' + t('to') + ' ' + mx;
+}
+
+function copyField(key, raw){
+  const text = String(raw || '');
+  const done = () => toast(t('copied'));
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else fallbackCopy(text, done);
+}
+function fallbackCopy(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch (_) {}
+  document.body.removeChild(ta);
+}
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._h);
+  el._h = setTimeout(() => el.classList.remove('show'), 1600);
+}
+
+function accountRows(acct, showBadge){
+  const items = [
+    { k: 'pix', ic: '🔑', lb: t('pix') },
+    { k: 'bank_name', ic: '🏦', lb: t('bankName') },
+    { k: 'bank_account', ic: '💳', lb: t('bankAccount') },
+    { k: 'bank_holder', ic: '👤', lb: t('bankHolder') }
+  ];
+  const rows = items.filter(it => (acct[it.k] || '').trim()).map(it => {
+    const val = acct[it.k];
+    return '<div class="row">' +
+      '<span class="ic">' + it.ic + '</span>' +
+      '<span class="lb">' + it.lb + '</span>' +
+      '<span class="vl">' + esc(val) + '</span>' +
+      '<button class="copy" onclick="copyField(\'' + it.k + '\', this.getAttribute(\'data-v\'))" data-v="' + esc(val) + '">' + t('copy') + '</button>' +
+      '</div>';
+  }).join('');
+  return rows;
+}
+
+function render(){
+  const main = document.getElementById('main');
+  const acct = activeAccount();
+  const note = (paymentAccounts.pay_note && paymentAccounts.pay_note.value) || '';
+  const hasDefault = Object.values(defaultAccount()).some(v => (v || '').trim());
+  const hasAny = hasDefault || note || tiers.length > 0;
+  if (!hasAny) {
+    main.innerHTML = '<div class="card"><div class="empty">⚠️ ' + t('empty') + '</div></div>';
+    return;
+  }
+  let html = '';
+  html += '<div class="card pay">' +
+    '<h2>💳 ' + t('payAccount') +
+    (matchTier(document.getElementById('amt').value) ? '<span class="badge">' + t('hit') + '</span>' : '') +
+    '</h2>' +
+    (accountRows(acct).trim() || '<div class="empty">' + t('empty') + '</div>') +
+    (note ? '<div class="note">💡 <b>' + t('note') + '：</b>' + esc(note) + '</div>' : '') +
+    '</div>';
+
+  if (tiers.length) {
+    html += '<div class="card"><h2>📊 ' + t('tiers') + '</h2>';
+    const hit = matchTier(document.getElementById('amt').value);
+    tiers.forEach((tr, i) => {
+      const on = hit === tr;
+      html += '<div class="tier' + (on ? ' on' : '') + '">' +
+        '<div class="hd"><span class="rg">' + rangeLabel(tr) + '</span><span class="mk">✓ ' + t('hit') + '</span></div>' +
+        '<div class="dt">' +
+        [tr.pix ? 'PIX: ' + esc(tr.pix) : '',
+         tr.bank_name ? t('bankName') + ': ' + esc(tr.bank_name) : '',
+         tr.bank_account ? t('bankAccount') + ': ' + esc(tr.bank_account) : '',
+         tr.bank_holder ? t('bankHolder') + ': ' + esc(tr.bank_holder) : ''
+        ].filter(Boolean).join('<br>') +
+        '</div></div>';
+    });
+    html += '</div>';
+  }
+  main.innerHTML = html;
+}
+
+function onAmt(){ render(); }
+
+// ═══ INIT ═══
+(async () => {
+  applyLang();
+  try {
+    await loadPaymentAccounts();
+  } catch (e) {
+    console.error(e);
+    document.getElementById('main').innerHTML = '<div class="card"><div class="empty">⚠️ ' + t('loadFail') + '</div></div>';
+    return;
+  }
+  render();
+})();
+</script>
+</body>
+</html>
